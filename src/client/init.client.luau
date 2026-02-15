@@ -1,33 +1,58 @@
-print("Hello world, from client!")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
--- ItemSpawner.lua
--- Place this in ServerScriptService
+print("[Client] Step UI script running for:", player.Name)
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- UI Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "StepGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Configuration
-local SPAWN_POSITION = Vector3.new(0, 5, 0) -- Change to where you want the item to spawn
-local ITEM_NAME = "Coin" -- Name of the item in ReplicatedStorage
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 200, 0, 50)
+mainFrame.Position = UDim2.new(0, 20, 1, -70)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.BorderSizePixel = 0
+mainFrame.Parent = screenGui
 
--- Wait for the item template to exist
-local itemTemplate = ReplicatedStorage:WaitForChild(ITEM_NAME)
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 12)
+uiCorner.Parent = mainFrame
 
--- Function to spawn the item
-local function spawnItem()
-	local newItem = itemTemplate:Clone()
-	newItem.Parent = workspace
-	
-	-- Set position
-	if newItem:IsA("Model") then
-		newItem:MoveTo(SPAWN_POSITION)
-	elseif newItem:IsA("BasePart") then
-		newItem.Position = SPAWN_POSITION
-	end
-	
-	print(ITEM_NAME .. " spawned at", SPAWN_POSITION)
+local stepLabel = Instance.new("TextLabel")
+stepLabel.Name = "StepLabel"
+stepLabel.Size = UDim2.new(1, -20, 1, 0)
+stepLabel.Position = UDim2.new(0, 10, 0, 0)
+stepLabel.BackgroundTransparency = 1
+stepLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+stepLabel.TextSize = 24
+stepLabel.Font = Enum.Font.GothamMedium
+stepLabel.TextXAlignment = Enum.TextXAlignment.Left
+stepLabel.Text = "Steps: 0"
+stepLabel.Parent = mainFrame
+
+-- Update Logic
+local function updateStepDisplay(newValue)
+	stepLabel.Text = "Steps: " .. tostring(newValue)
 end
 
--- Spawn the item when the game starts
-task.wait(3)
-spawnItem()
+-- Wait for leaderstats
+print("[Client] Waiting for leaderstats...")
+local leaderstats = player:WaitForChild("leaderstats")
+print("[Client] leaderstats found, waiting for Steps...")
+local stepsValue = leaderstats:WaitForChild("Steps")
+print("[Client] Steps found:", stepsValue.Value)
 
+-- Initial update
+updateStepDisplay(stepsValue.Value)
+
+-- Listen for changes
+stepsValue:GetPropertyChangedSignal("Value"):Connect(function()
+	print("[Client] Steps updated to:", stepsValue.Value)
+	updateStepDisplay(stepsValue.Value)
+end)
+
+print("Step UI initialized.")
