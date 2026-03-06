@@ -8,21 +8,8 @@ print("[StepTrackerServer] Script running")
 
 local lastPositions = {}
 
-local function calculateSpeed(steps)
-    -- formula: 4 + a * ln(bx + 1) steps/sec
-    -- multiply by 3 to convert to studs/sec
-    local stepsPerSec =  4+ 5 * math.log(0.1 * steps + 1)
-    return stepsPerSec * 3
-end
-
 local function updatePlayerSpeed(player)
-    local character = player.Character
-    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-    if humanoid then
-        local steps = StepTracker.PlayerSteps[player.UserId] or 0
-        local newSpeed = calculateSpeed(steps)
-        humanoid.WalkSpeed = newSpeed
-    end
+    StepTracker.UpdatePlayerSpeed(player)
 end
 
 local function onHeartbeat()
